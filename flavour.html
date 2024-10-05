@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ice Cream Shop Inventory</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color:black;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background:rgb(152, 240, 237);
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        .form-container {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px;
+            width: 100%;
+            border: none;
+            border-radius: 5px;
+            background-color:darkcyan;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ice Cream Shop Inventory</h1>
+        <div class="form-container">
+            <h2>Add New Ice Cream</h2>
+            <input type="text" id="flavor" placeholder="Flavor" required />
+            <input type="number" id="price" placeholder="Price" required min="0" step="0.01" />
+            <input type="number" id="quantity" placeholder="Quantity" required min="0" />
+            <button id="addButton">Add Ice Cream</button>
+        </div>
+        <div class="form-container">
+            <h2>Update Ice Cream</h2>
+            <input type="text" id="updateFlavor" placeholder="Flavor to Update" required />
+            <input type="number" id="updatePrice" placeholder="New Price" min="0" step="0.01" />
+            <input type="number" id="updateQuantity" placeholder="New Quantity" min="0" />
+            <button id="updateButton">Update Ice Cream</button>
+        </div>
+        <h2>Current Inventory</h2>
+        <ul id="inventoryList"></ul>
+        <h2>Total Inventory Value: <span id="totalValue">$0</span></h2>
+    </div>
+
+    <script>
+        class IceCream {
+            constructor(flavor, price, quantity) {
+                this.flavor = flavor;
+                this.price = price;
+                this.quantity = quantity;
+            }
+
+            getTotalValue() {
+                return this.price * this.quantity;
+            }
+        }
+
+        class IceCreamShopInventory {
+            constructor() {
+                this.inventory = {};
+            }
+
+            addIceCream(flavor, price, quantity) {
+                if (this.inventory[flavor]) {
+                    alert(`${flavor} already exists.`);
+                } else {
+                    this.inventory[flavor] = new IceCream(flavor, price, quantity);
+                    this.updateInventoryDisplay();
+                    this.updateTotalValue();
+                }
+            }
+
+            updateIceCream(flavor, price, quantity) {
+                if (this.inventory[flavor]) {
+                    if (price !== null && !isNaN(price)) {
+                        this.inventory[flavor].price = price;
+                    }
+                    if (quantity !== null && !isNaN(quantity)) {
+                        this.inventory[flavor].quantity = quantity;
+                    }
+                    this.updateInventoryDisplay();
+                    this.updateTotalValue();
+                } else {
+                    alert(`${flavor} not found in inventory.`);
+                }
+            }
+
+            updateInventoryDisplay() {
+                const inventoryList = document.getElementById('inventoryList');
+                inventoryList.innerHTML = '';
+                for (let flavor in this.inventory) {
+                    const iceCream = this.inventory[flavor];
+                    const li = document.createElement('li');
+                    li.textContent = `${iceCream.flavor}: $${iceCream.price.toFixed(2)}, Quantity: ${iceCream.quantity}`;
+                    inventoryList.appendChild(li);
+                }
+            }
+
+            updateTotalValue() {
+                const totalValueElement = document.getElementById('totalValue');
+                const totalValue = Object.values(this.inventory).reduce((total, iceCream) => {
+                    return total + iceCream.getTotalValue();
+                }, 0);
+                totalValueElement.textContent = `$${totalValue.toFixed(2)}`;
+            }
+        }
+
+        // Initialize the inventory
+        const inventory = new IceCreamShopInventory();
+
+        // Add event listeners for the buttons
+        document.getElementById('addButton').addEventListener('click', () => {
+            const flavor = document.getElementById('flavor').value;
+            const price = parseFloat(document.getElementById('price').value);
+            const quantity = parseInt(document.getElementById('quantity').value);
+            if (flavor && !isNaN(price) && !isNaN(quantity)) {
+                inventory.addIceCream(flavor, price, quantity);
+                // Clear input fields
+                document.getElementById('flavor').value = '';
+                document.getElementById('price').value = '';
+                document.getElementById('quantity').value = '';
+            } else {
+                alert('Please fill out all fields correctly.');
+            }
+        });
+
+        document.getElementById('updateButton').addEventListener('click', () => {
+            const flavor = document.getElementById('updateFlavor').value;
+            const price = parseFloat(document.getElementById('updatePrice').value) || null;
+            const quantity = parseInt(document.getElementById('updateQuantity').value) || null;
+            if (flavor) {
+                inventory.updateIceCream(flavor, price, quantity);
+                // Clear input fields
+                document.getElementById('updateFlavor').value = '';
+                document.getElementById('updatePrice').value = '';
+                document.getElementById('updateQuantity').value = '';
+            } else {
+                alert('Please enter a flavor to update.');
+            }
+        });
+    </script>
+</body>
+</html>
